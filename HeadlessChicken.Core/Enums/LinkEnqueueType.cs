@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HeadlessChicken.Core.Crawling
+namespace HeadlessChicken.Core.Enums
 {
     public enum LinkEnqueueType
     {

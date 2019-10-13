@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HeadlessChicken.Core.Actions;
 using HeadlessChicken.Core.Crawling;
 
-namespace HeadlessChicken.Core
+namespace HeadlessChicken.Core.Models
 {
-    public class Job
+    public class JobDTO
     {
         public IEnumerable<Uri> Seeds { get; set; }
         public LinkEnqueueType LinkEnqueueType { get; set; }
@@ -16,5 +17,7 @@ namespace HeadlessChicken.Core
 
         public TimeSpan MaxTime { get; set; }
         public int MaxPageCrawl { get; set; }
+
+        public IEnumerable<CrawlAction> CrawlActions { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using PuppeteerSharp;
+using HeadlessChicken.Core.Models;
 
 namespace HeadlessChicken
 {
@@ -33,7 +34,7 @@ namespace HeadlessChicken
             _browser.Dispose();
         }
 
-        public async Task<ProgressResult> Start(Job job, CancellationToken cancellationToken, PauseToken pauseToken, ProgressToken progressToken)
+        public async Task<ProgressResult> Start(JobDTO job, CancellationToken cancellationToken, PauseToken pauseToken, ProgressToken progressToken)
         {
             return null;
         }
