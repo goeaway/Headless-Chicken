@@ -47,7 +47,7 @@ namespace HeadlessChicken.Workers
             PauseToken pauseToken,
             WorkerRelevantJobData jobData,
             ConcurrentQueue<Uri> queue,
-            ConcurrentDictionary<Uri, string> crawled)
+            ConcurrentDictionary<Uri, CrawlData> crawled)
         {
             foreach (var worker in _workers)
             {

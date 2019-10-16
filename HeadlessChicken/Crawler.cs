@@ -19,15 +19,21 @@ namespace HeadlessChicken
     {
         private readonly Browser _browser;
         private ConcurrentQueue<Uri> _uriQueue;
-        private ConcurrentDictionary<Uri, string> _crawledBag;
-        private readonly TimeSpan _abortWOrkersTimeSpan;
+        private ConcurrentDictionary<Uri, CrawlData> _crawledData;
 
         public bool IsCrawling { get; private set; }
 
-        public Crawler(TimeSpan abortWorkersTimeout)
-        {
-            _abortWOrkersTimeSpan = abortWorkersTimeout;
+        public TimeSpan AbortWorkersTimeout { get; set; }
+            = Consts.WorkerAbortTimeout;
 
+        public int WorkerGroupsCount { get; set; }
+            = Consts.WorkerGroupCount;
+
+        public int WorkersPerGroup { get; set; }
+            = Consts.WorkerPerGroupCount;
+
+        public Crawler()
+        {
             // initialise by downloading the browser if needed
             new BrowserFetcher()
                 .DownloadAsync(BrowserFetcher.DefaultRevision)
@@ -63,10 +69,14 @@ namespace HeadlessChicken
         private void CleanUpFromCrawl(IEnumerable<Uri> seeds)
         {
             _uriQueue = new ConcurrentQueue<Uri>(seeds);
-            _crawledBag = new ConcurrentDictionary<Uri, string>();
+            _crawledData = new ConcurrentDictionary<Uri, CrawlData>();
         }
 
-        public Task<ProgressResult> Start(JobDTO job, CancellationToken cancellationToken, PauseToken pauseToken, ProgressToken progressToken)
+        public Task<ProgressResult> Start(
+            JobDTO job, 
+            CancellationToken cancellationToken, 
+            PauseToken pauseToken, 
+            ProgressToken progressToken)
         {
             if (IsCrawling)
             {
@@ -83,13 +93,13 @@ namespace HeadlessChicken
                 // create worker groups (max 64 threads, could give them each a browser, can give them each a set of domains to work on)
                 var group = new WorkerGroup(
                     _browser, 
-                    10);
+                    WorkersPerGroup);
 
                 group.StartWorkers(
                     pauseToken,
                     workerRelevantJobData,
                     _uriQueue,
-                    _crawledBag);
+                    _crawledData);
 
                 IsCrawling = true;
 
@@ -113,7 +123,7 @@ namespace HeadlessChicken
                 var start = DateTime.Now;
 
                 // after cancellation is requested we fall into another loop, this has a time limit, so if not all worker groups are done
-                while (!group.AllDone && (DateTime.Now - start) < _abortWOrkersTimeSpan)
+                while (!group.AllDone && (DateTime.Now - start) < AbortWorkersTimeout)
                 {
                     // notify of which threads are holding us up
                     Thread.Sleep(10);

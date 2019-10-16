@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HeadlessChicken.Abstractions;
+using HeadlessChicken.Core.Enums;
+using HeadlessChicken.Core.Models;
 using HeadlessChicken.Core.Pausing;
 using HeadlessChicken.Core.Progress;
 using HeadlessChicken.Models;
@@ -31,7 +33,7 @@ namespace HeadlessChicken.Workers
             PauseToken pauseToken,
             WorkerRelevantJobData jobData,
             ConcurrentQueue<Uri> queue,
-            ConcurrentDictionary<Uri, string> crawled)
+            ConcurrentDictionary<Uri, CrawlData> crawled)
         {
             Thread = new Thread(
                 async() => await ThreadWork(
@@ -51,11 +53,12 @@ namespace HeadlessChicken.Workers
             PauseToken pauseToken,
             WorkerRelevantJobData jobData,
             ConcurrentQueue<Uri> queue,
-            ConcurrentDictionary<Uri, string> crawled)
+            ConcurrentDictionary<Uri, CrawlData> crawled)
         {
             try
             {
                 Running = true;
+                var tab = await browser.NewPageAsync();
 
                 // create a new tab on the browser for this thread
 
@@ -82,9 +85,25 @@ namespace HeadlessChicken.Workers
                         }
                     }
 
-                    await browser.GetUserAgentAsync();
-                    // put result in crawl dict
+                    // go to page
+                    var response = await tab.GoToAsync(nextUri.AbsolutePath);
+                    if (response.Ok)
+                    {
+                        // perform the jobs actions
+                        // each action could yield a return value, such as extracted data
+                        // the url should be added to the crawl collection 
+                    }
+                    else
+                    {
+                        // indicate in the crawled collection this was a failure + reason
+                        crawled.TryAdd(nextUri, CrawlData.CreateFailureData(response.Status, response.StatusText));
+                    }
 
+                    // if we should look for some links on the page
+                    if (jobData.LinkEnqueueType != LinkEnqueueType.None)
+                    {
+
+                    }
                 }
             }
             catch (ThreadAbortException e)
