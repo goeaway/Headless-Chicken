@@ -11,11 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions\" />
+    <ProjectReference Include="..\HeadlessChicken.Core\HeadlessChicken.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HeadlessChicken.Core\HeadlessChicken.Core.csproj" />
+    <Folder Include="Enums\" />
   </ItemGroup>
 
 </Project>
