@@ -102,7 +102,8 @@ namespace HeadlessChicken.Workers
                     // if we should look for some links on the page
                     if (jobData.LinkEnqueueType != LinkEnqueueType.None)
                     {
-
+                        // get the page content and just put it in a collection
+                        // parser group will sort through and add the links
                     }
                 }
             }
