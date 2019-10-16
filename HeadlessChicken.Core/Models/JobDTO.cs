@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using HeadlessChicken.Core.Actions;
-using HeadlessChicken.Core.Crawling;
+using HeadlessChicken.Core.Enums;
 
 namespace HeadlessChicken.Core.Models
 {

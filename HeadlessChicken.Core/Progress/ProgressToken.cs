@@ -6,6 +6,17 @@ namespace HeadlessChicken.Core.Progress
 {
     public struct ProgressToken
     {
-        public ProgressState State { get; set; }
+        public bool ProgressIsRequested { get; private set; }
+
+        private ProgressState _state;
+        public ProgressState State
+        {
+            get => _state;
+            set
+            {
+                _state = value;
+                ProgressIsRequested = false;
+            }
+        }
     }
 }

@@ -16,8 +16,6 @@ namespace HeadlessChicken.Core.Actions
             return this;
         }
 
-        public CrawlActionListBuilder 
-
         public IEnumerable<CrawlAction> GetList()
         {
             return _crawlActions;

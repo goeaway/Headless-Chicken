@@ -9,7 +9,7 @@ namespace HeadlessChicken.Tests
         [TestMethod]
         public async Task Usage1()
         {
-            using (var chicken = new Chicken())
+            using (var chicken = new Crawler())
             {
                 var crawlTask = chicken.Start();
 
