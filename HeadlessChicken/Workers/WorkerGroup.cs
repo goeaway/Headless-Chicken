@@ -19,8 +19,8 @@ namespace HeadlessChicken.Workers
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly ICollection<Worker> _workers;
 
-        public bool AllDone => _workers.All(w => !w.DoneEvent.WaitOne(1));
-        public bool SomeDone => _workers.Any(w => w.DoneEvent.WaitOne(1));
+        public bool AllDone => _workers.All(w => w.DoneEvent.IsSet);
+        public bool AnyDone => _workers.Any(w => w.DoneEvent.IsSet);
 
         public WorkerGroup(
             Browser browser,
@@ -36,9 +36,8 @@ namespace HeadlessChicken.Workers
 
             for (int i = 0; i < amount; i++)
             {
-                var doneEvent = new ManualResetEvent(false);
                 _workers.Add(
-                    new Worker(i, doneEvent)
+                    new Worker(i)
                 );
             }
         }
@@ -51,7 +50,7 @@ namespace HeadlessChicken.Workers
         {
             foreach (var worker in _workers)
             {
-                worker.StartThread(
+                worker.Start(
                     _browser, 
                     _cancellationTokenSource.Token, 
                     pauseToken, 
@@ -77,7 +76,7 @@ namespace HeadlessChicken.Workers
             foreach (var worker in _workers)
             {
                 // if the worker is not yet done, we abort
-                if (!worker.DoneEvent.WaitOne(1))
+                if (!worker.DoneEvent.IsSet)
                 {
                     worker.Thread.Abort();
                 }

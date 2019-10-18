@@ -19,16 +19,16 @@ namespace HeadlessChicken.Workers
         public int ID { get; }
         public bool Running { get; private set; }
         public bool HasWork { get; private set; }
-        public ManualResetEvent DoneEvent { get; private set; }
+        public ManualResetEventSlim DoneEvent { get; private set; }
         public Thread Thread { get; private set; }
 
-        public Worker(int id, ManualResetEvent doneEvent)
+        public Worker(int id)
         {
             ID = id;
-            DoneEvent = doneEvent;
+            DoneEvent = new ManualResetEventSlim(false);
         }
 
-        public void StartThread(Browser browser,
+        public void Start(Browser browser,
             CancellationToken cancellationToken,
             PauseToken pauseToken,
             WorkerRelevantJobData jobData,

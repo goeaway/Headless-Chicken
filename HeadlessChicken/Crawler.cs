@@ -18,8 +18,6 @@ namespace HeadlessChicken
     public class Crawler : IDisposable
     {
         private readonly Browser _browser;
-        private ConcurrentQueue<Uri> _uriQueue;
-        private ConcurrentDictionary<Uri, CrawlData> _crawledData;
 
         public bool IsCrawling { get; private set; }
 
@@ -56,20 +54,14 @@ namespace HeadlessChicken
             }
         }
 
-        private ProgressResult GetResult()
+        private ProgressResult GetResult(ConcurrentQueue<Uri> queue, ConcurrentDictionary<Uri, CrawlData> crawled) 
         {
             return null;
         }
 
-        private ProgressState GetState()
+        private ProgressState GetState(ConcurrentQueue<Uri> queue, ConcurrentDictionary<Uri, CrawlData> crawled)
         {
             return null;
-        }
-
-        private void CleanUpFromCrawl(IEnumerable<Uri> seeds)
-        {
-            _uriQueue = new ConcurrentQueue<Uri>(seeds);
-            _crawledData = new ConcurrentDictionary<Uri, CrawlData>();
         }
 
         public Task<ProgressResult> Start(
@@ -83,10 +75,6 @@ namespace HeadlessChicken
                 throw new CrawlerAlreadyRunningException();
             }
 
-            // clean up from any previous crawls
-            // seed the queue
-            CleanUpFromCrawl(job.Seeds);
-
             return Task.Run(() =>
             {
                 var workerRelevantJobData = WorkerRelevantJobData.FromJobDTO(job);
@@ -95,11 +83,15 @@ namespace HeadlessChicken
                     _browser, 
                     WorkersPerGroup);
 
+                var uriQueue = new ConcurrentQueue<Uri>(job.Seeds);
+                var htmlQueue = new ConcurrentQueue<string>();
+                var crawled = new ConcurrentDictionary<Uri, CrawlData>();
+
                 group.StartWorkers(
                     pauseToken,
                     workerRelevantJobData,
-                    _uriQueue,
-                    _crawledData);
+                    uriQueue,
+                    crawled);
 
                 IsCrawling = true;
 
@@ -113,7 +105,7 @@ namespace HeadlessChicken
                     // progress is checked via the collections and then updated
                     if (progressToken.ProgressIsRequested)
                     {
-                        progressToken.State = GetState();
+                        progressToken.State = GetState(uriQueue, crawled);
                     }
                     Thread.Sleep(10);
                 }
@@ -142,7 +134,7 @@ namespace HeadlessChicken
 
                 IsCrawling = false;
 
-                return GetResult();
+                return GetResult(uriQueue, crawled);
             });
         }
     }
