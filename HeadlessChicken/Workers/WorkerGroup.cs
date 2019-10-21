@@ -17,7 +17,7 @@ namespace HeadlessChicken.Workers
     {
         private readonly Browser _browser;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly ICollection<Worker> _workers;
+        private readonly ICollection<Getter> _workers;
 
         public bool AllDone => _workers.All(w => w.DoneEvent.IsSet);
         public bool AnyDone => _workers.Any(w => w.DoneEvent.IsSet);
@@ -32,12 +32,12 @@ namespace HeadlessChicken.Workers
             }
 
             _cancellationTokenSource = new CancellationTokenSource();
-            _workers = new List<Worker>(amount);
+            _workers = new List<Getter>(amount);
 
             for (int i = 0; i < amount; i++)
             {
                 _workers.Add(
-                    new Worker(i)
+                    new Getter(i)
                 );
             }
         }
@@ -46,6 +46,7 @@ namespace HeadlessChicken.Workers
             PauseToken pauseToken,
             WorkerRelevantJobData jobData,
             ConcurrentQueue<Uri> queue,
+            ConcurrentQueue<string> htmlQueue,
             ConcurrentDictionary<Uri, CrawlData> crawled)
         {
             foreach (var worker in _workers)
@@ -56,6 +57,7 @@ namespace HeadlessChicken.Workers
                     pauseToken, 
                     jobData, 
                     queue, 
+                    htmlQueue,
                     crawled);
             }
         }
